@@ -13,4 +13,7 @@ public class SupplyMovementResponse {
     private Integer quantity;
     private LocalDateTime date;
     private String reason;
+    private String recipientName;
+    private String recipientUnit;
+    private String performedBy;
 }

@@ -18,4 +18,7 @@ public class SupplyMovementRequest {
     private Integer quantity;
 
     private String reason;
+    private String recipientName;
+    private String recipientUnit;
+    private String performedBy;
 }

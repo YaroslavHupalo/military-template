@@ -2,6 +2,7 @@ package ua.edu.viti.military.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.Id;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -26,12 +27,9 @@ public class SupplyItemController {
         return service.getAll();
     }
 
-    @GetMapping("/{id}")
-    @Operation(summary = "Get supply item by ID")
-    public SupplyItemResponse getById(@PathVariable Long id) {
-        return service.getById(id);
-    }
-
+   @GetMapping("/{id}")
+   @Operation( summary = "Get supply item")
+   public SupplyItemResponse getById(@PathVariable Long id) {return service.getById(id); }
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create new supply item")

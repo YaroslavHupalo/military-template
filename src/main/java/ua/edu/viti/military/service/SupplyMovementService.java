@@ -1,6 +1,7 @@
 package ua.edu.viti.military.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ua.edu.viti.military.dto.request.SupplyMovementRequest;
@@ -8,7 +9,9 @@ import ua.edu.viti.military.dto.response.SupplyMovementResponse;
 import ua.edu.viti.military.entity.MovementType;
 import ua.edu.viti.military.entity.SupplyItem;
 import ua.edu.viti.military.entity.SupplyMovement;
+import ua.edu.viti.military.event.SupplyMovementEvent;
 import ua.edu.viti.military.exception.ResourceNotFoundException;
+import ua.edu.viti.military.mapper.SupplyMovementMapper;
 import ua.edu.viti.military.repository.SupplyItemRepository;
 import ua.edu.viti.military.repository.SupplyMovementRepository;
 
@@ -23,11 +26,13 @@ public class SupplyMovementService {
 
     private final SupplyMovementRepository repository;
     private final SupplyItemRepository itemRepository;
+    private final SupplyMovementMapper mapper;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
     public List<SupplyMovementResponse> getAll() {
         return repository.findAll().stream()
-                .map(this::mapToResponse)
+                .map(mapper::toResponse)
                 .collect(Collectors.toList());
     }
 
@@ -39,15 +44,20 @@ public class SupplyMovementService {
         validateMovement(item, request);
         updateItemQuantity(item, request);
 
-        SupplyMovement movement = SupplyMovement.builder()
-                .type(request.getType())
-                .item(item)
-                .quantity(request.getQuantity())
-                .date(LocalDateTime.now())
-                .reason(request.getReason())
-                .build();
+        SupplyMovement movement = mapper.toEntity(request);
+        movement.setItem(item);
 
-        return mapToResponse(repository.save(movement));
+        SupplyMovement savedMovement = repository.save(movement);
+
+        eventPublisher.publishEvent(new SupplyMovementEvent(
+                savedMovement.getId(),
+                savedMovement.getItem().getId(),
+                savedMovement.getQuantity(),
+                savedMovement.getType(),
+                savedMovement.getDate()
+        ));
+
+        return mapper.toResponse(savedMovement);
     }
 
     private void validateMovement(SupplyItem item, SupplyMovementRequest request) {
@@ -78,16 +88,5 @@ public class SupplyMovementService {
                 break;
         }
         itemRepository.save(item);
-    }
-
-    private SupplyMovementResponse mapToResponse(SupplyMovement movement) {
-        SupplyMovementResponse response = new SupplyMovementResponse();
-        response.setId(movement.getId());
-        response.setType(movement.getType());
-        response.setItemName(movement.getItem().getName());
-        response.setQuantity(movement.getQuantity());
-        response.setDate(movement.getDate());
-        response.setReason(movement.getReason());
-        return response;
     }
 }
