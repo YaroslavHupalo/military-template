@@ -1,0 +1,21 @@
+### Отримати список всіх складів
+GET http://localhost:8080/api/v1/warehouses
+
+### Отримати список всіх товарів
+GET http://localhost:8080/api/v1/items
+
+### Отримати список категорій
+GET http://localhost:8080/api/v1/categories
+
+### Отримати історію переміщень
+GET http://localhost:8080/api/v1/movements
+
+### Створити новий склад (приклад)
+POST http://localhost:8080/api/v1/warehouses
+Content-Type: application/json
+
+{
+  "name": "Склад БК #5",
+  "location": "Північний напрямок",
+  "capacity": 5000
+}
